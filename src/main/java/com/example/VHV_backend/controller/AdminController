@@ -1,0 +1,40 @@
+package com.example.VHV_backend.controller;
+
+import com.example.VHV_backend.model.Patient; // Make sure you have a Patient model
+import com.example.VHV_backend.repo.PatientRepository; // Make sure you have a PatientRepository
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize; // For role-based access
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@CrossOrigin
+@RestController
+@RequestMapping("api/admin") // Admin-specific endpoints
+public class AdminController {
+    
+    private final PatientRepository patientRepository;
+
+    @Autowired
+    public AdminController(PatientRepository patientRepository) {
+        this.patientRepository = patientRepository;
+    }
+
+    // Endpoint to get all patients
+    @GetMapping("/patients")
+    @PreAuthorize("hasRole('ADMIN')") // Only accessible by admin
+    public ResponseEntity<List<Patient>> getAllPatients() {
+        List<Patient> patients = patientRepository.findAll();
+        return new ResponseEntity<>(patients, HttpStatus.OK);
+    }
+
+    // Endpoint to add a new patient
+    @PostMapping("/patients")
+    @PreAuthorize("hasRole('ADMIN')") // Only accessible by admin
+    public ResponseEntity<Patient> addPatient(@RequestBody Patient patient) {
+        Patient savedPatient = patientRepository.save(patient);
+        return new ResponseEntity<>(savedPatient, HttpStatus.CREATED);
+    }
+}
